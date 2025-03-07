@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XRate Pro - Exchange Calculator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="p-4">
+
+    <div class="container">
+        <h2 class="mb-4 text-primary"><i class="fas fa-exchange-alt"></i> XRate Pro</h2>
+
+        <div class="row g-3">
+            <!-- Amount Input -->
+            <div class="col-md-4">
+                <label for="amount" class="form-label">Amount:</label>
+                <input type="number" id="amount" class="form-control" value="1" min="0">
+            </div>
+
+            <!-- From Currency Selector -->
+            <div class="col-md-4">
+                <label for="fromCurrency" class="form-label">From Currency:</label>
+                <select id="fromCurrency" class="form-select" onchange="checkCrypto('fromCurrency')"></select>
+                <div id="fromCryptoAlert" class="alert alert-warning mt-2 d-none">
+                    <i class="fas fa-exclamation-triangle"></i> This is a cryptocurrency.
+                </div>
+            </div>
+
+            <!-- To Currency Selector -->
+            <div class="col-md-4">
+                <label for="toCurrency" class="form-label">To Currency:</label>
+                <select id="toCurrency" class="form-select" onchange="checkCrypto('toCurrency')"></select>
+                <div id="toCryptoAlert" class="alert alert-warning mt-2 d-none">
+                    <i class="fas fa-exclamation-triangle"></i> This is a cryptocurrency.
+                </div>
+            </div>
+        </div>
+
+        <!-- Convert Button -->
+        <div class="text-center mt-3">
+            <button class="btn btn-primary" onclick="convertCurrency()">
+                <i class="fas fa-calculator"></i> Convert
+            </button>
+        </div>
+
+        <!-- Result Display -->
+        <div class="mt-4 p-3 border rounded bg-light">
+            <h4 id="conversionResult" class="text-center text-success"></h4>
+            <p id="rateSource" class="text-center text-muted"></p>
+        </div>
+    </div>
+
+    <script>
+        const apiURL = "https://cdn.jsdelivr.net/gh/fawazahmed0/exchange-api@latest/v1/currencies/";
+        const cryptoCurrencies = ["BTC", "ETH", "LTC", "BNB", "XRP", "DOGE"]; // Crypto list
+        let currencies = {};
+
+        // Fetch the list of supported currencies
+        async function fetchCurrencies() {
+            try {
+                const response = await fetch(apiURL + "usd.json");
+                const data = await response.json();
+                currencies = Object.keys(data.usd).sort();
+
+                populateDropdowns();
+            } catch (error) {
+                console.error("Error fetching currencies:", error);
+            }
+        }
+
+        // Populate currency dropdowns
+        function populateDropdowns() {
+            const fromDropdown = document.getElementById("fromCurrency");
+            const toDropdown = document.getElementById("toCurrency");
+
+            currencies.forEach(code => {
+                let option = new Option(code.toUpperCase(), code);
+                fromDropdown.add(option.cloneNode(true));
+                toDropdown.add(option.cloneNode(true));
+            });
+
+            fromDropdown.value = "usd"; // Default to USD
+            toDropdown.value = "eur"; // Default to EUR
+        }
+
+        // Check if selected currency is crypto
+        function checkCrypto(selector) {
+            const currency = document.getElementById(selector).value;
+            const alertBox = document.getElementById(selector === "fromCurrency" ? "fromCryptoAlert" : "toCryptoAlert");
+
+            if (cryptoCurrencies.includes(currency.toUpperCase())) {
+                alertBox.classList.remove("d-none");
+            } else {
+                alertBox.classList.add("d-none");
+            }
+        }
+
+        // Convert currency
+        async function convertCurrency() {
+            const amount = parseFloat(document.getElementById("amount").value);
+            const from = document.getElementById("fromCurrency").value;
+            const to = document.getElementById("toCurrency").value;
+            const resultBox = document.getElementById("conversionResult");
+            const sourceBox = document.getElementById("rateSource");
+
+            if (!amount || amount <= 0) {
+                resultBox.innerHTML = "Enter a valid amount!";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiURL}${from}.json`);
+                const data = await response.json();
+                const rate = data[from][to];
+
+                if (rate) {
+                    const convertedAmount = (amount * rate).toFixed(2);
+                    resultBox.innerHTML = `${amount} ${from.toUpperCase()} = <strong>${convertedAmount} ${to.toUpperCase()}</strong>`;
+                    sourceBox.innerHTML = `Exchange Rate: 1 ${from.toUpperCase()} = ${rate} ${to.toUpperCase()}<br>
+                        <small>Source: <a href="https://github.com/fawazahmed0/exchange-api" target="_blank">Exchange API</a></small>`;
+                } else {
+                    resultBox.innerHTML = "Conversion rate unavailable!";
+                }
+            } catch (error) {
+                resultBox.innerHTML = "Error fetching exchange rates!";
+                console.error("Conversion error:", error);
+            }
+        }
+
+        // Initialize the app
+        fetchCurrencies();
+    </script>
+
+</body>
+</html>
