@@ -25,6 +25,6 @@ This project uses the [Exchange API](https://github.com/fawazahmed0/currency-api
 - Click "Convert" to get the latest exchange rate.
 
 ## 📝 License
-This project is licensed under the MIT License. See the [LICENSE]() file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ⭐ Enjoy using the app? Give this repo a star! 🌟
