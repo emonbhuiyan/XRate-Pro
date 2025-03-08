@@ -16,7 +16,7 @@ A simple and modern currency exchange calculator using **Bootstrap** and the **E
 </p>
 
 ## 🔗 API Source
-This project uses the [Exchange API](https://github.com/fawazahmed0/currency-api) for real-time and historical exchange rates.
+This project uses the [Exchange API](https://github.com/fawazahmed0/exchange-api) for real-time and historical exchange rates.
 
 ## ⚡ Usage
 - Enter the amount.
